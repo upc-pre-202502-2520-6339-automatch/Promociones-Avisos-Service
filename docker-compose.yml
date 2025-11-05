@@ -1,0 +1,36 @@
+services:
+  postgres:
+    container_name: postgres-promos
+    image: postgres:16
+    environment:
+      POSTGRES_DB: automatch_promos
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - automatch-network
+
+  promos-announcement-service:
+    build: .
+    container_name: automatch-promos
+    ports:
+      - "8082:8082"
+    depends_on:
+      - postgres
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-promos:5432/automatch_promos
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+    networks:
+      - automatch-network
+
+volumes:
+  postgres_data:
+
+networks:
+  automatch-network:
+    driver: bridge
